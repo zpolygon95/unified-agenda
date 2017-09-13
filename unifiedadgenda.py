@@ -36,22 +36,71 @@ def unfold_ical(lines):
     return out
 
 
-def get_calendar_events(calendarpath):
-    events = []
+def getcomponents(lines):
+    """Parse an array of lines into a series of nested dicts and arrays.
+
+    RFC 5545 specified a recursive structure for calendar objects, with each
+    component beginning with a `BEGIN:(component)` line, and ending with an
+    `END:(component)` line. Sets of components may all occupy the same level,
+    without any additional syntax. Recursive components may be defined within
+    BEGIN and END lines of a single parent component.
+
+    This function generalizes this format, and parses it into a nested dict
+    structure, such that it may be faithfully output using the json library.
+
+    Components with the same name, defined on the same level, are grouped into
+    a single element in the containing dict as an array of dicts, with their
+    shared name as the key. Unique components are still stored in a single
+    element array.
+
+    properties with the same name, defined on the same level, are grouped into
+    a single element in the containing dict as an array of 2-tuples. each tuple
+    contains a dict of the property's parameters, and an array or string of the
+    property's values.
+    """
+    level = 0
+    component = {}
+    innercomponent = []
+    innercomponentname = ''
+    for line in lines:
+        if line.startswith('BEGIN:'):
+            level += 1
+            if level == 1:
+                innercomponentname = line.split(':')[1]
+                innercomponent = []
+                if innercomponentname not in component.keys():
+                    component[innercomponentname] = []
+            else:
+                innercomponent += [line]
+        elif line.startswith('END:'):
+            level -= 1
+            if level == 0:
+                name = line.split(':')[1]
+                if name == innercomponentname:
+                    component[name] += [getcomponents(innercomponent)]
+                else:
+                    errortext = 'START:{} and END{} statements do not match'
+                    errortext = errortext.format(innercomponentname, name)
+                    raise SyntaxError(errortext)
+            else:
+                innercomponent += [line]
+        elif ':' in line:
+            if level == 0:
+                pass
+            else:
+                innercomponent += [line]
+        else:
+            errortext = 'Line {} does not contain ":"'.format(repr(line))
+            raise SyntaxError(errortext)
+
+    return component
+
+
+def parse_calendar_data(calendarpath):
     with open(calendarpath, 'r') as calfile:
         lines = unfold_ical(calfile.readlines())
-    inevent = False
-    for line in lines:
-        if 'BEGIN:VEVENT' in line:
-            inevent = True
-            continue
-        if 'END:VEVENT' in line:
-            inevent = False
-            continue
-        if inevent:
-            if 'SUMMARY:' in line:
-                print(line.split(':')[1].strip())
-    return events
+    calendar = getcomponents(lines)['VCALENDAR']
+    # TODO - What to return?
 
 
 class unifiedagenda:
@@ -74,18 +123,20 @@ class unifiedagenda:
         self.parse_calendars()
 
     def sync_calendars(self):
-        for calendar in self.settings['webcalendars']:
+        webcalendars = [cal for cal in self.settings['calendars']
+                        if 'url' in cal.keys()
+                        ]
+        for calendar in webcalendars:
             r = requests.get(calendar['url'])
             print('requesting calendar for {}...'.format(calendar['name']))
             print(r.status_code)
-            calendarpath = self.CONFIG_PATH + '/' + calendar['name'] + '.ics'
-            with open(calendarpath, 'w') as calendarfile:
+            with open(calendar['path'], 'w') as calendarfile:
                 calendarfile.write(r.text)
 
     def parse_calendars(self):
         self.events = []
         for calendar in self.settings['calendars']:
-            self.events += get_calendar_events(calendar['path'])
+            self.events += parse_calendar_data(calendar['path'])
 
     def load_settings(self):
         try:
