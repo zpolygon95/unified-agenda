@@ -26,13 +26,41 @@ import os
 import requests
 
 
+def unfold_ical(lines):
+    out = []
+    for line in lines:
+        if line[0] == ' ' or line[0] == '\t':
+            out[-1] += line[1:]
+        else:
+            out += [line]
+    return out
+
+
+def get_calendar_events(calendarpath):
+    events = []
+    with open(calendarpath, 'r') as calfile:
+        lines = unfold_ical(calfile.readlines())
+    inevent = False
+    for line in lines:
+        if 'BEGIN:VEVENT' in line:
+            inevent = True
+            continue
+        if 'END:VEVENT' in line:
+            inevent = False
+            continue
+        if inevent:
+            if 'SUMMARY:' in line:
+                print(line.split(':')[1].strip())
+    return events
+
+
 class unifiedagenda:
     """docstring for unifiedagenda."""
     ID = 'io.zjp.unifiedagenda'
     CONFIG_PATH = '~/.config/' + ID
     SETTINGS_NAME = 'settings.json'
     DEFAULT_SETTINGS = {
-        'webcalendars': []
+        'calendars': []
     }
 
     def __init__(self):
@@ -43,8 +71,7 @@ class unifiedagenda:
         except FileExistsError:
             pass
         self.load_settings()
-        print(self.settings)
-        self.sync_calendars()
+        self.parse_calendars()
 
     def sync_calendars(self):
         for calendar in self.settings['webcalendars']:
@@ -54,6 +81,11 @@ class unifiedagenda:
             calendarpath = self.CONFIG_PATH + '/' + calendar['name'] + '.ics'
             with open(calendarpath, 'w') as calendarfile:
                 calendarfile.write(r.text)
+
+    def parse_calendars(self):
+        self.events = []
+        for calendar in self.settings['calendars']:
+            self.events += get_calendar_events(calendar['path'])
 
     def load_settings(self):
         try:
