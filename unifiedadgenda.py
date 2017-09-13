@@ -79,7 +79,7 @@ def getcomponents(lines):
                 if name == innercomponentname:
                     component[name] += [getcomponents(innercomponent)]
                 else:
-                    errortext = 'START:{} and END{} statements do not match'
+                    errortext = 'START:{} and END:{} statements do not match'
                     errortext = errortext.format(innercomponentname, name)
                     raise SyntaxError(errortext)
             else:
