@@ -99,8 +99,7 @@ def getcomponents(lines):
 def parse_calendar_data(calendarpath):
     with open(calendarpath, 'r') as calfile:
         lines = unfold_ical(calfile.readlines())
-    calendar = getcomponents(lines)['VCALENDAR']
-    # TODO - What to return?
+    return getcomponents(lines)['VCALENDAR']
 
 
 class unifiedagenda:
