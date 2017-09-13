@@ -133,9 +133,9 @@ class unifiedagenda:
                 calendarfile.write(r.text)
 
     def parse_calendars(self):
-        self.events = []
+        self.calendars = []
         for calendar in self.settings['calendars']:
-            self.events += parse_calendar_data(calendar['path'])
+            self.calendars += parse_calendar_data(calendar['path'])
 
     def load_settings(self):
         try:
