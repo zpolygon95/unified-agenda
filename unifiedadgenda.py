@@ -86,13 +86,23 @@ def getcomponents(lines):
                 innercomponent += [line]
         elif ':' in line:
             if level == 0:
-                pass
+                key = line[:line.index(':')]
+                value = line[line.index(':') + 1:]
+                params = key.split(';')
+                name = params[0]
+                params = params[1:]
+                paramdict = {}
+                for param in params:
+                    [pname, pval] = param.split('=')
+                    paramdict[pname] = pval.split(',')
+                if name not in component.keys():
+                    component[name] = []
+                component[name] += [(paramdict, v) for v in value.split(',')]
             else:
                 innercomponent += [line]
         else:
             errortext = 'Line {} does not contain ":"'.format(repr(line))
             raise SyntaxError(errortext)
-
     return component
 
 
