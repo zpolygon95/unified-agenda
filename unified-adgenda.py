@@ -28,7 +28,7 @@ import requests
 
 class unifiedagenda:
     """docstring for unifiedagenda."""
-    ID = 'io.zjp.unified-agenda'
+    ID = 'io.zjp.unifiedagenda'
     CONFIG_PATH = '~/.config/' + ID
     SETTINGS_NAME = 'settings.json'
     DEFAULT_SETTINGS = {
