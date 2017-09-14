@@ -109,7 +109,7 @@ def getcomponents(lines):
 def parse_calendar_data(calendarpath):
     with open(calendarpath, 'r') as calfile:
         lines = unfold_ical(calfile.readlines())
-    return getcomponents(lines)['VCALENDAR']
+    return getcomponents([l.strip() for l in lines])
 
 
 class unifiedagenda:
@@ -145,7 +145,8 @@ class unifiedagenda:
     def parse_calendars(self):
         self.calendars = []
         for calendar in self.settings['calendars']:
-            self.calendars += parse_calendar_data(calendar['path'])
+            data = parse_calendar_data(calendar['path'])
+            self.calendars += data['VCALENDAR']
 
     def load_settings(self):
         try:
