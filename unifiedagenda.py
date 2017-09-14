@@ -30,9 +30,9 @@ def unfold_ical(lines):
     out = []
     for line in lines:
         if line[0] == ' ' or line[0] == '\t':
-            out[-1] += line[1:]
+            out[-1] += line[1:].rstrip('\r\n')
         else:
-            out += [line]
+            out += [line.rstrip('\r\n')]
     return out
 
 
