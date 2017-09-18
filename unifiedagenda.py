@@ -21,10 +21,13 @@ will include several configuration options.
     └── Quit
 """
 
+import datetime as dt
 import json
 import os
 import requests
 
+import dateutil.parser as parser
+import dateutil.rrule as rrule
 
 def unfold_ical(lines):
     out = []
@@ -97,7 +100,7 @@ def getcomponents(lines):
                     paramdict[pname] = pval.split(',')
                 if name not in component.keys():
                     component[name] = []
-                component[name] += [(paramdict, v) for v in value.split(',')]
+                component[name] += [(paramdict, value)]
             else:
                 innercomponent += [line]
         else:
@@ -110,6 +113,37 @@ def parse_calendar_data(calendarpath):
     with open(calendarpath, 'r') as calfile:
         lines = unfold_ical(calfile.readlines())
     return getcomponents([l.strip() for l in lines])
+
+def get_occurrences(event, rstart, rend):
+    assert rstart <= rend
+    start = parser.parse(event['DTSTART'][0][1])
+    end = parser.parse(event['DTEND'][0][1])
+    delta = end - start
+    occurrences = []
+    if 'RRULE' in event.keys() and start.date() <= rstart:
+        ruleset = rrule.rrulestr(
+            '\r\n'.join([e[1] for e in event['RRULE']]),
+            dtstart=start,
+            forceset=True,
+            ignoretz=True
+        )
+        if 'EXDATE' in event.keys():
+            for date in event['EXDATE']:
+                ruleset.exdate(parser.parse(date[1]))
+        return [
+            (event, d, d + delta)
+            for d in ruleset.between(
+                dt.datetime.combine(rstart, dt.time(0, 0)),
+                dt.datetime.combine(rend, dt.time(23, 59)),
+                inc=True
+            )
+        ]
+    else:
+        occurrences = [(event, start, end)]
+    return [
+        o for o in occurrences
+        if o[1].date() <= rend and o[2].date() >= rstart
+    ]
 
 
 class unifiedagenda:
@@ -130,6 +164,13 @@ class unifiedagenda:
             pass
         self.load_settings()
         self.parse_calendars()
+
+    def get_events(self, rstart=dt.date.today(), rend=dt.date.today()):
+        events = []
+        for calendar in self.calendars:
+            for event in calendar['VEVENT']:
+                events += get_occurrences(event, rstart, rend)
+        return events
 
     def sync_calendars(self):
         webcalendars = [cal for cal in self.settings['calendars']
