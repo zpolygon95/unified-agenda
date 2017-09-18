@@ -203,5 +203,95 @@ class unifiedagenda:
             settingsfile.write('\n')
 
 
+class agendaindicator:
+    """Insert docstring here"""
+
+    def __init__(self):
+        self.agenda = unifiedagenda()
+        self.ID = self.agenda.ID
+        self.indicator = appind.Indicator.new(
+            self.ID,
+            gtk.STOCK_INFO,
+            appind.IndicatorCategory.SYSTEM_SERVICES
+        )
+        self.indicator.set_label('testing!', '')
+        self.indicator.set_status(appind.IndicatorStatus.ACTIVE)
+        self.indicator.set_menu(self.build_menu())
+        notify.init(self.ID)
+
+    def run(self):
+        self.running = True
+        self.update()
+        gtk.main()
+
+    def build_menu(self):
+        events = sorted(self.agenda.get_events(), key=lambda e: e[1])
+        menu = gtk.Menu()
+        for event in events:
+            summary = event[0]['SUMMARY'][0][1]
+            start = event[1].strftime('%H:%M')
+            end = event[2].strftime('%H:%M')
+            menutext = '{} {} - {}'.format(summary, start, end)
+            menuitem = gtk.MenuItem(menutext)
+            submenu = gtk.Menu()
+            submenutext = '{} - {}'.format(event[1], event[2])
+            submenu.append(gtk.MenuItem(submenutext))
+            menuitem.set_submenu(submenu)
+            menu.append(menuitem)
+        item_quit = gtk.MenuItem('Quit')
+        item_quit.connect('activate', self.quit)
+        menu.append(item_quit)
+        menu.show_all()
+        return menu
+
+    def update(self):
+        if self.running:
+            events = sorted(self.agenda.get_events(), key=lambda e: e[1])
+            now = dt.datetime.today()
+            nextevent = None
+            currentevent = None
+            for event in events:
+                if event[1] < now and event[2] > now:
+                    currentevent = event
+                if event[1] > now:
+                    break
+            for event in events:
+                nextevent = event
+                if event[1] > now:
+                    break
+            if currentevent is not None:
+                label = '{name} for {hours:02d}:{minutes:02d}'
+                ename = currentevent[0]['SUMMARY'][0][1]
+                delta = currentevent[2] - now
+                args = {
+                    'name': ename,
+                    'hours': delta.seconds // 3600,
+                    'minutes': (delta.seconds // 60) % 60
+                }
+                label = label.format(**args)
+                self.indicator.set_label(label, '')
+            elif nextevent is not None:
+                label = '{name} in {hours:02d}:{minutes:02d}'
+                ename = nextevent[0]['SUMMARY'][0][1]
+                delta = nextevent[1] - now
+                args = {
+                    'name': ename,
+                    'hours': delta.seconds // 3600,
+                    'minutes': (delta.seconds // 60) % 60
+                }
+                label = label.format(**args)
+                self.indicator.set_label(label, '')
+            else:
+                self.indicator.set_label('No more events', '')
+            threading.Timer(1, self.update).start()
+        else:
+            notify.uninit()
+            gtk.main_quit()
+
+    def quit(self, event):
+        self.running = False
+
+
 if __name__ == '__main__':
-    unifiedagenda()
+    indicator = agendaindicator()
+    indicator.run()
