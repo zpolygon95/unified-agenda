@@ -28,6 +28,15 @@ import requests
 
 import dateutil.parser as parser
 import dateutil.rrule as rrule
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('AppIndicator3', '0.1')
+gi.require_version('Notify', '0.7')
+from gi.repository import Gtk as gtk
+from gi.repository import AppIndicator3 as appind
+from gi.repository import Notify as notify
+import threading
+
 
 def unfold_ical(lines):
     out = []
@@ -110,9 +119,13 @@ def getcomponents(lines):
 
 
 def parse_calendar_data(calendarpath):
-    with open(calendarpath, 'r') as calfile:
-        lines = unfold_ical(calfile.readlines())
-    return getcomponents([l.strip() for l in lines])
+    try:
+        with open(calendarpath, 'r') as calfile:
+            lines = unfold_ical(calfile.readlines())
+        return getcomponents([l.strip() for l in lines])
+    except FileNotFoundError:
+        return None
+
 
 def get_occurrences(event, rstart, rend):
     assert rstart <= rend
@@ -178,16 +191,28 @@ class unifiedagenda:
                         ]
         for calendar in webcalendars:
             r = requests.get(calendar['url'])
-            print('requesting calendar for {}...'.format(calendar['name']))
-            print(r.status_code)
+            # print('requesting calendar for {}...'.format(calendar['name']))
+            # print(r.status_code)
             with open(calendar['path'], 'w') as calendarfile:
                 calendarfile.write(r.text)
+        self.parse_calendars()
 
     def parse_calendars(self):
         self.calendars = []
         for calendar in self.settings['calendars']:
             data = parse_calendar_data(calendar['path'])
-            self.calendars += data['VCALENDAR']
+            if data is not None:
+                self.calendars += data['VCALENDAR']
+            else:
+                self.sync_calendars()
+                data = parse_calendar_data(calendar['path'])
+                if data is not None:
+                    self.calendars += data['VCALENDAR']
+                else:
+                    print('Calendar {} not found.\nShould be at {}'.format(
+                        calendar['name'],
+                        calendar['path']
+                    ))
 
     def load_settings(self):
         try:
