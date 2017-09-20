@@ -4,6 +4,18 @@ A simple Unity Top Bar widget for displaying iCal events, written in python.
 
 ## TODO ##
 
++ Add a preferences menu
++ Customizable Formatting of Display Text
++ Manual Web Calendar Sync
++ Automatic Web Calendar Sync
+  + Customizable Frequency
+  + Based on datestamp on calendar file
++ Indication that an event is complete in the menu
++ Notification System
+  + Based on VALARM components?
+  + Based on customizable rules
++ Customizable Indicator Icon
++ Add Mac OS Support with [rumps](https://github.com/jaredks/rumps)
 + </del>Basic Functionality:</del>
   + <del>Parse iCal file into list of day's events</del>
     + <del>Parse iCal file into operable objects</del>
