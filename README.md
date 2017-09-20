@@ -6,7 +6,7 @@ A simple Unity Top Bar widget for displaying iCal events, written in python.
 
 + Add a preferences menu
 + Customizable Formatting of Display Text
-+ Manual Web Calendar Sync
++ <del>Manual Web Calendar Sync</del>
 + Automatic Web Calendar Sync
   + Customizable Frequency
   + Based on datestamp on calendar file

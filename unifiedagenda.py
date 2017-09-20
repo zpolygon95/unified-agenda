@@ -260,6 +260,12 @@ class agendaindicator:
             menutext = menutext.format(start, end, summary)
             menuitem = gtk.MenuItem(menutext)
             menu.append(menuitem)
+        menu.append(gtk.SeparatorMenuItem())
+        item_sync = gtk.MenuItem('Sync')
+        item_sync.connect('activate', self.sync)
+        menu.append(item_sync)
+        item_pref = gtk.MenuItem('Preferences')
+        menu.append(item_pref)
         item_quit = gtk.MenuItem('Quit')
         item_quit.connect('activate', self.quit)
         menu.append(item_quit)
@@ -309,6 +315,11 @@ class agendaindicator:
         else:
             notify.uninit()
             gtk.main_quit()
+
+    def sync(self, event):
+        self.agenda.load_settings()
+        self.agenda.sync_calendars()
+        self.indicator.set_menu(self.build_menu())
 
     def quit(self, event):
         self.running = False
