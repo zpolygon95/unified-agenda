@@ -16,6 +16,7 @@ A simple Unity Top Bar widget for displaying iCal events, written in python.
   + Based on customizable rules
 + Customizable Indicator Icon
 + Add Mac OS Support with [rumps](https://github.com/jaredks/rumps)
++ Turn this into a fully-fledged package and sumbit to the PyPi?
 + </del>Basic Functionality:</del>
   + <del>Parse iCal file into list of day's events</del>
     + <del>Parse iCal file into operable objects</del>
