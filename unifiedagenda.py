@@ -256,12 +256,9 @@ class agendaindicator:
             summary = event[0]['SUMMARY'][0][1]
             start = event[1].strftime('%H:%M')
             end = event[2].strftime('%H:%M')
-            menutext = '{} {} - {}'.format(summary, start, end)
+            menutext = '{} - {}\t{}'
+            menutext = menutext.format(start, end, summary)
             menuitem = gtk.MenuItem(menutext)
-            submenu = gtk.Menu()
-            submenutext = '{} - {}'.format(event[1], event[2])
-            submenu.append(gtk.MenuItem(submenutext))
-            menuitem.set_submenu(submenu)
             menu.append(menuitem)
         item_quit = gtk.MenuItem('Quit')
         item_quit.connect('activate', self.quit)
