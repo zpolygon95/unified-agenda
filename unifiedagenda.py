@@ -265,6 +265,7 @@ class agendaindicator:
         item_sync.connect('activate', self.sync)
         menu.append(item_sync)
         item_pref = gtk.MenuItem('Preferences')
+        item_pref.connect('activate', self.open_prefs)
         menu.append(item_pref)
         item_quit = gtk.MenuItem('Quit')
         item_quit.connect('activate', self.quit)
@@ -321,8 +322,67 @@ class agendaindicator:
         self.agenda.sync_calendars()
         self.indicator.set_menu(self.build_menu())
 
+    def open_prefs(self, event):
+        win = PrefsWindow(self.agenda.settings)
+        win.connect('delete-event', self.close_prefs)
+        win.show_all()
+
+    def close_prefs(self, window, event):
+        self.agenda.settings = window.settings
+        self.agenda.save_settings()
+
     def quit(self, event):
         self.running = False
+
+
+class PrefsWindow(gtk.Window):
+
+    def __init__(self, settings):
+        gtk.Window.__init__(self, title="Preferences")
+        self.settings = settings
+
+        self.set_border_width(10)
+
+        hbox = gtk.Box(orientation=gtk.Orientation.HORIZONTAL, spacing=6)
+        self.add(hbox)
+
+        stack = gtk.Stack()
+        stack.set_transition_type(gtk.StackTransitionType.NONE)
+
+        for calendar in self.settings['calendars']:
+            grid = gtk.Grid()
+            grid.set_column_spacing(10)
+            grid.set_row_spacing(5)
+            lname = gtk.Label('name')
+            ename = gtk.Entry()
+            ename.set_hexpand(True)
+            lpath = gtk.Label('path')
+            epath = gtk.Entry()
+            epath.set_icon_from_icon_name(gtk.EntryIconPosition.SECONDARY,
+                                          gtk.STOCK_OPEN
+                                          )
+            lurl = gtk.Label('url')
+            eurl = gtk.Entry()
+            grid.add(lname)
+            grid.attach(ename, 1, 0, 2, 1)
+            grid.attach(lpath, 0, 1, 1, 1)
+            grid.attach(epath, 1, 1, 2, 1)
+            grid.attach(lurl, 0, 2, 1, 1)
+            grid.attach(eurl, 1, 2, 2, 1)
+            stack.add_titled(grid, calendar['name'], calendar['name'])
+
+        stack_switcher = gtk.StackSidebar()
+        stack_switcher.set_stack(stack)
+        addbutton = gtk.Button('+')
+        delbutton = gtk.Button('-')
+        buttonbox = gtk.Box(orientation=gtk.Orientation.HORIZONTAL)
+        buttonbox.pack_start(addbutton, True, True, 0)
+        buttonbox.pack_start(delbutton, True, True, 0)
+        controlbox = gtk.Box(orientation=gtk.Orientation.VERTICAL)
+        controlbox.pack_start(stack_switcher, True, True, 0)
+        controlbox.pack_start(buttonbox, False, False, 0)
+        hbox.pack_start(controlbox, False, False, 0)
+        hbox.pack_start(stack, True, True, 0)
 
 
 if __name__ == '__main__':
