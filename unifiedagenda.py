@@ -357,15 +357,35 @@ class PrefsWindow(gtk.Window):
             ename = gtk.Entry()
             ename.set_text(calendar['name'])
             ename.set_hexpand(True)
+            ename.set_name(calendar['name'])
+            ename.set_editable(False)
             lpath = gtk.Label('path')
             epath = gtk.Entry()
             epath.set_icon_from_icon_name(gtk.EntryIconPosition.SECONDARY,
                                           gtk.STOCK_OPEN
                                           )
             epath.set_text(calendar['path'])
+            epath.set_name(calendar['name'])
+            epath.connect(
+                'focus-out-event',
+                lambda widget, event: self.set_calendar_settings(
+                    widget.get_name(),
+                    'path',
+                    widget.get_text()
+                )
+            )
             lurl = gtk.Label('url')
             eurl = gtk.Entry()
             eurl.set_text(calendar['url'])
+            eurl.set_name(calendar['name'])
+            eurl.connect(
+                'focus-out-event',
+                lambda widget, event: self.set_calendar_settings(
+                    widget.get_name(),
+                    'url',
+                    widget.get_text()
+                )
+            )
             grid.add(lname)
             grid.attach(ename, 1, 0, 2, 1)
             grid.attach(lpath, 0, 1, 1, 1)
@@ -386,6 +406,12 @@ class PrefsWindow(gtk.Window):
         controlbox.pack_start(buttonbox, False, False, 0)
         hbox.pack_start(controlbox, False, False, 0)
         hbox.pack_start(stack, True, True, 0)
+
+    def set_calendar_settings(self, name, setting, value):
+        for i in range(len(self.settings['calendars'])):
+            if self.settings['calendars'][i]['name'] == name:
+                self.settings['calendars'][i][setting] = value
+                break
 
 
 if __name__ == '__main__':
