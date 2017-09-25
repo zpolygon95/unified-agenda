@@ -355,14 +355,17 @@ class PrefsWindow(gtk.Window):
             grid.set_row_spacing(5)
             lname = gtk.Label('name')
             ename = gtk.Entry()
+            ename.set_text(calendar['name'])
             ename.set_hexpand(True)
             lpath = gtk.Label('path')
             epath = gtk.Entry()
             epath.set_icon_from_icon_name(gtk.EntryIconPosition.SECONDARY,
                                           gtk.STOCK_OPEN
                                           )
+            epath.set_text(calendar['path'])
             lurl = gtk.Label('url')
             eurl = gtk.Entry()
+            eurl.set_text(calendar['url'])
             grid.add(lname)
             grid.attach(ename, 1, 0, 2, 1)
             grid.attach(lpath, 0, 1, 1, 1)

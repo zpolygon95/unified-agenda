@@ -10,7 +10,7 @@ A simple Unity Top Bar widget for displaying iCal events, written in python.
     + <del>Remove calendar sources</del>
     + <del>Set name, path, and URL of calendar source</del>
   + Implement Functionality
-    + Put data from current settings into each widget
+    + <del>Put data from current settings into each widget</del>
     + Retrieve data from each widget
     + Add calendar source
     + Remove calendar source
