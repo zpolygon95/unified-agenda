@@ -423,15 +423,17 @@ class PrefsWindow(gtk.Window):
         return grid
 
     def add_calendar(self, widget):
+        ncalname = 'New Calendar'
         newcal = {
-            'name': 'New Calendar',
+            'name': ncalname,
             'path': '',
             'url': ''
         }
         self.settings['calendars'] += [newcal]
         grid = self.build_cal_menu(newcal)
-        self.calstack.add_titled(grid, 'New Calendar', 'New Calendar')
+        self.calstack.add_titled(grid, ncalname, ncalname)
         self.show_all()
+        self.calstack.set_visible_child_name(ncalname)
 
     def remove_calendar(self, widget):
         toremove = self.calstack.get_visible_child_name()
