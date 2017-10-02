@@ -127,6 +127,16 @@ def parse_calendar_data(calendarpath):
         return None
 
 
+def tzinfo_from_tzid(tzid, vtimezones):
+    """Return a tzinfo object representing the given tzid string.
+
+    The mappings between tzid and tzinfo are obtained from the list of
+    vtimezones, as created from an ical source by the getcomponents function.
+    """
+    for tz in vtimezones:
+        pass
+
+
 def get_occurrences(event, rstart, rend):
     """Get the occurrences of event touching the range between rstart and rend.
 
