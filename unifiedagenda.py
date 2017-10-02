@@ -392,6 +392,11 @@ class PrefsWindow(gtk.Window):
         epath.set_icon_from_icon_name(gtk.EntryIconPosition.SECONDARY,
                                       gtk.STOCK_OPEN
                                       )
+        epath.set_icon_activatable(gtk.EntryIconPosition.SECONDARY, True)
+        epath.set_icon_tooltip_text(gtk.EntryIconPosition.SECONDARY,
+                                    'Open file dialog'
+                                    )
+        epath.connect('icon-release', self.choose_path)
         epath.set_text(calendar['path'])
         epath.set_name(calendar['name'])
         epath.connect(
@@ -453,6 +458,25 @@ class PrefsWindow(gtk.Window):
                 self.calstack.add_titled(grid, newname, newname)
                 self.show_all()
                 self.calstack.set_visible_child_name(newname)
+
+    def choose_path(self, widget, pos, event):
+        dialog = gtk.FileChooserDialog(
+            'Set Calendar Path',
+            self,
+            gtk.FileChooserAction.SAVE,
+            (
+                gtk.STOCK_CANCEL, gtk.ResponseType.CANCEL,
+                gtk.STOCK_OK, gtk.ResponseType.OK
+            )
+        )
+        filename = widget.get_text()
+        if filename is not '':
+            dialog.set_filename(filename)
+        resp = dialog.run()
+        if resp == gtk.ResponseType.OK:
+            widget.set_text(dialog.get_filename())
+            self.set_focus(widget)
+        dialog.destroy()
 
     def set_calendar_settings(self, name, setting, value):
         for i in range(len(self.settings['calendars'])):
