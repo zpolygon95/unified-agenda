@@ -346,58 +346,19 @@ class PrefsWindow(gtk.Window):
         hbox = gtk.Box(orientation=gtk.Orientation.HORIZONTAL, spacing=6)
         self.add(hbox)
 
-        stack = gtk.Stack()
-        stack.set_transition_type(gtk.StackTransitionType.NONE)
+        self.calstack = gtk.Stack()
+        self.calstack.set_transition_type(gtk.StackTransitionType.NONE)
 
         for calendar in self.settings['calendars']:
-            grid = gtk.Grid()
-            grid.set_column_spacing(10)
-            grid.set_row_spacing(5)
-            lname = gtk.Label('name')
-            ename = gtk.Entry()
-            ename.set_text(calendar['name'])
-            ename.set_hexpand(True)
-            ename.set_name(calendar['name'])
-            ename.set_editable(False)
-            lpath = gtk.Label('path')
-            epath = gtk.Entry()
-            epath.set_icon_from_icon_name(gtk.EntryIconPosition.SECONDARY,
-                                          gtk.STOCK_OPEN
-                                          )
-            epath.set_text(calendar['path'])
-            epath.set_name(calendar['name'])
-            epath.connect(
-                'focus-out-event',
-                lambda widget, event: self.set_calendar_settings(
-                    widget.get_name(),
-                    'path',
-                    widget.get_text()
-                )
-            )
-            lurl = gtk.Label('url')
-            eurl = gtk.Entry()
-            eurl.set_text(calendar['url'])
-            eurl.set_name(calendar['name'])
-            eurl.connect(
-                'focus-out-event',
-                lambda widget, event: self.set_calendar_settings(
-                    widget.get_name(),
-                    'url',
-                    widget.get_text()
-                )
-            )
-            grid.add(lname)
-            grid.attach(ename, 1, 0, 2, 1)
-            grid.attach(lpath, 0, 1, 1, 1)
-            grid.attach(epath, 1, 1, 2, 1)
-            grid.attach(lurl, 0, 2, 1, 1)
-            grid.attach(eurl, 1, 2, 2, 1)
-            stack.add_titled(grid, calendar['name'], calendar['name'])
+            grid = self.build_cal_menu(calendar)
+            self.calstack.add_titled(grid, calendar['name'], calendar['name'])
 
         stack_switcher = gtk.StackSidebar()
-        stack_switcher.set_stack(stack)
+        stack_switcher.set_stack(self.calstack)
         addbutton = gtk.Button('+')
+        addbutton.connect('clicked', self.add_calendar)
         delbutton = gtk.Button('-')
+        delbutton.connect('clicked', self.remove_calendar)
         buttonbox = gtk.Box(orientation=gtk.Orientation.HORIZONTAL)
         buttonbox.pack_start(addbutton, True, True, 0)
         buttonbox.pack_start(delbutton, True, True, 0)
@@ -405,7 +366,88 @@ class PrefsWindow(gtk.Window):
         controlbox.pack_start(stack_switcher, True, True, 0)
         controlbox.pack_start(buttonbox, False, False, 0)
         hbox.pack_start(controlbox, False, False, 0)
-        hbox.pack_start(stack, True, True, 0)
+        hbox.pack_start(self.calstack, True, True, 0)
+
+    def build_cal_menu(self, calendar):
+        grid = gtk.Grid()
+        grid.set_column_spacing(10)
+        grid.set_row_spacing(5)
+        lname = gtk.Label('name')
+        ename = gtk.Entry()
+        ename.set_text(calendar['name'])
+        ename.set_hexpand(True)
+        ename.set_name(calendar['name'])
+        ename.connect(
+            'focus-out-event',
+            lambda widget, event: self.rename_calendar(
+                widget.get_name(),
+                widget.get_text()
+            )
+        )
+        lpath = gtk.Label('path')
+        epath = gtk.Entry()
+        epath.set_icon_from_icon_name(gtk.EntryIconPosition.SECONDARY,
+                                      gtk.STOCK_OPEN
+                                      )
+        epath.set_text(calendar['path'])
+        epath.set_name(calendar['name'])
+        epath.connect(
+            'focus-out-event',
+            lambda widget, event: self.set_calendar_settings(
+                widget.get_name(),
+                'path',
+                widget.get_text()
+            )
+        )
+        lurl = gtk.Label('url')
+        eurl = gtk.Entry()
+        eurl.set_text(calendar['url'])
+        eurl.set_name(calendar['name'])
+        eurl.connect(
+            'focus-out-event',
+            lambda widget, event: self.set_calendar_settings(
+                widget.get_name(),
+                'url',
+                widget.get_text()
+            )
+        )
+        grid.add(lname)
+        grid.attach(ename, 1, 0, 2, 1)
+        grid.attach(lpath, 0, 1, 1, 1)
+        grid.attach(epath, 1, 1, 2, 1)
+        grid.attach(lurl, 0, 2, 1, 1)
+        grid.attach(eurl, 1, 2, 2, 1)
+        return grid
+
+    def add_calendar(self, widget):
+        newcal = {
+            'name': 'New Calendar',
+            'path': '',
+            'url': ''
+        }
+        self.settings['calendars'] += [newcal]
+        grid = self.build_cal_menu(newcal)
+        self.calstack.add_titled(grid, 'New Calendar', 'New Calendar')
+        self.show_all()
+
+    def remove_calendar(self, widget):
+        toremove = self.calstack.get_visible_child_name()
+        self.settings['calendars'] = [
+            cal for cal in self.settings['calendars']
+            if cal['name'] != toremove
+        ]
+        self.calstack.remove(self.calstack.get_visible_child())
+        self.show_all()
+
+    def rename_calendar(self, oldname, newname):
+        for i in range(len(self.settings['calendars'])):
+            if self.settings['calendars'][i]['name'] == oldname:
+                self.settings['calendars'][i]['name'] = newname
+                self.calstack.remove(self.calstack.get_child_by_name(oldname))
+                grid = self.build_cal_menu(self.settings['calendars'][i])
+                self.calstack.add_titled(grid, newname, newname)
+                self.show_all()
+                self.calstack.set_visible_child_name(newname)
 
     def set_calendar_settings(self, name, setting, value):
         for i in range(len(self.settings['calendars'])):
