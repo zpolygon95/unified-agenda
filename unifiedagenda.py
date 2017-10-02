@@ -187,7 +187,7 @@ class unifiedagenda:
 
     def sync_calendars(self):
         webcalendars = [cal for cal in self.settings['calendars']
-                        if 'url' in cal.keys()
+                        if 'url' in cal.keys() and cal['url'] is not ''
                         ]
         for calendar in webcalendars:
             r = requests.get(calendar['url'])
@@ -199,7 +199,10 @@ class unifiedagenda:
 
     def parse_calendars(self):
         self.calendars = []
-        for calendar in self.settings['calendars']:
+        checkcals = [cal for cal in self.settings['calendars']
+                     if 'path' in cal.keys() and cal['path'] is not ''
+                     ]
+        for calendar in checkcals:
             data = parse_calendar_data(calendar['path'])
             if data is not None:
                 self.calendars += data['VCALENDAR']
