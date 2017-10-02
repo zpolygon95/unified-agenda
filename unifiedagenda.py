@@ -128,6 +128,37 @@ def parse_calendar_data(calendarpath):
 
 
 def get_occurrences(event, rstart, rend):
+    """Get the occurrences of event touching the range between rstart and rend.
+
+    The dateutil.ruleset.between function does not properly detect that any
+    part of an event falls within a range. There exist the following cases:
+
+    1.  event lies entirely within range
+           [event]
+        [---range---]
+
+    2.  event begins before, but ends during range
+        [event]
+           [---range---]
+
+    3.  event begins during, but ends after range
+                 [event]
+        [---range---]
+
+    4.  event begins before, and ends after range
+        [---event---]
+           [range]
+
+    5.  event begins and ends before range
+        [event]
+                [range]
+
+    6.  event begins and ends after range
+                [event]
+        [range]
+
+    Cases 1 through 4 are considered to be "touching" the given range.
+    """
     assert rstart <= rend
     start = parser.parse(event['DTSTART'][0][1])
     end = parser.parse(event['DTEND'][0][1])
