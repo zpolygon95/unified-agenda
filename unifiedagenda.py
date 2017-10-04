@@ -389,9 +389,16 @@ class PrefsWindow(gtk.Window):
         self.settings = settings
 
         self.set_border_width(10)
+        vbox = gtk.Box(orientation=gtk.Orientation.VERTICAL, spacing=6)
+        vbox.pack_start(self.build_sources_menu(), False, False, 10)
+        vbox.pack_start(self.build_placeholder_menu(), False, False, 10)
+        self.add(vbox)
 
+    def build_placeholder_menu(self):
+        return gtk.Label('Placeholder')
+
+    def build_sources_menu(self):
         hbox = gtk.Box(orientation=gtk.Orientation.HORIZONTAL, spacing=6)
-        self.add(hbox)
 
         self.calstack = gtk.Stack()
         self.calstack.set_transition_type(gtk.StackTransitionType.NONE)
@@ -414,6 +421,7 @@ class PrefsWindow(gtk.Window):
         controlbox.pack_start(buttonbox, False, False, 0)
         hbox.pack_start(controlbox, False, False, 0)
         hbox.pack_start(self.calstack, True, True, 0)
+        return hbox
 
     def build_cal_menu(self, calendar):
         grid = gtk.Grid()
