@@ -2,6 +2,23 @@
 
 A simple Unity Top Bar widget for displaying iCal events, written in python.
 
+Never fumble with calendar apps again! This widget will display exactly how
+much time you have until your next appointment, at a glance. Pull down the menu
+to get a full list of the current day's events.
+
+Web calendar sources can be specified by a URL from which they can be fetched,
+such as the private address provided by Google Calendar. Prefer to live
+off-the-grid? Unified Agenda supports local-only calendars as well: simply point
+the path field to your iCal file, and leave the URL field blank.
+
+Don't like something about this widget? Change it! All flavor text and icons can
+be modified.
+
+To run the widget, make the script executable with `chmod +x unifiedagenda.py`
+and execute with `./unifiedagenda.py`. If you prefer the settings to be stored
+somewhere other than `~/.config/io.zjp.unifiedagenda/`, just specify the path
+as the first argument: `./unifiedagenda.py [path]`.
+
 ## TODO ##
 
 + <del>Add a preferences menu</del>
@@ -21,11 +38,3 @@ A simple Unity Top Bar widget for displaying iCal events, written in python.
 + Add Mac OS Support with [rumps](https://github.com/jaredks/rumps)
 + Turn this into a fully-fledged package and sumbit to the PyPi?
 + </del>Basic Functionality:</del>
-  + <del>Parse iCal file into list of day's events</del>
-    + <del>Parse iCal file into operable objects</del>
-    + <del>properly handle</del> avoid handling escaped characters
-    + <del>Parse date/time information from event data</del>
-  + <del>Display time until next event in topbar widget</del>
-  + <del>Display list of pending events in menu</del>
-  + <del>Fetch iCal file from constant URL</del>
-  + <del>Store config data/whatever in ~/.config/unified-agenda/</del>
