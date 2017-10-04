@@ -308,9 +308,9 @@ class agendaindicator:
         item_sync = gtk.MenuItem('Sync')
         item_sync.connect('activate', self.sync)
         menu.append(item_sync)
-        item_nudge = gtk.MenuItem('Nudge')
-        item_nudge.connect('activate', lambda e: print(threading.enumerate()))
-        menu.append(item_nudge)
+        # item_nudge = gtk.MenuItem('Nudge')
+        # item_nudge.connect('activate', lambda e: self.indicator.set_label('test', ''))
+        # menu.append(item_nudge)
         item_pref = gtk.MenuItem('Preferences')
         item_pref.connect('activate', self.open_prefs)
         menu.append(item_pref)
@@ -391,7 +391,7 @@ class PrefsWindow(gtk.Window):
         self.set_border_width(10)
         vbox = gtk.Box(orientation=gtk.Orientation.VERTICAL, spacing=6)
         vbox.pack_start(self.build_sources_menu(), False, False, 10)
-        vbox.pack_start(self.build_placeholder_menu(), False, False, 10)
+        # vbox.pack_start(self.build_placeholder_menu(), False, False, 10)
         self.add(vbox)
 
     def build_placeholder_menu(self):
