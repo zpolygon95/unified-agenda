@@ -21,6 +21,7 @@ will include several configuration options.
     └── Quit
 """
 
+import argparse
 import datetime as dt
 import json
 import os
@@ -209,8 +210,8 @@ class unifiedagenda:
         'calendars': []
     }
 
-    def __init__(self):
-        self.CONFIG_PATH = os.path.expanduser(self.CONFIG_PATH)
+    def __init__(self, path):
+        self.CONFIG_PATH = os.path.expanduser(path)
         self.SETTINGS_PATH = self.CONFIG_PATH + '/' + self.SETTINGS_NAME
         try:
             os.makedirs(self.CONFIG_PATH, 0o755)
@@ -275,8 +276,8 @@ class unifiedagenda:
 class agendaindicator:
     """Insert docstring here"""
 
-    def __init__(self):
-        self.agenda = unifiedagenda()
+    def __init__(self, args):
+        self.agenda = unifiedagenda(args.settings)
         self.ID = self.agenda.ID
         self.indicator = appind.Indicator.new(
             self.ID,
@@ -538,5 +539,16 @@ class PrefsWindow(gtk.Window):
 
 
 if __name__ == '__main__':
-    indicator = agendaindicator()
+    aparser = argparse.ArgumentParser(description='An agenda for your menubar')
+    aparser.add_argument(
+        'settings',
+        nargs='?',
+        default=unifiedagenda.CONFIG_PATH,
+        help='Path in which the settings file `settings.json` resides. If ' +
+             'omitted, `~/.config/io.zjp.unifiedagenda/` is used by ' +
+             'default. If `$settings/settings.json` does not exist, a ' +
+             'default file is created in it\'s place.'
+    )
+    args = aparser.parse_args()
+    indicator = agendaindicator(args)
     indicator.run()
