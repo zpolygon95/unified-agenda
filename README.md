@@ -22,6 +22,7 @@ as the first argument: `./unifiedagenda.py [path]`.
 ## TODO ##
 
 + <del>Add a preferences menu</del>
++ <del>Customizable settings path</del>
 + Customizable Formatting of Display Text
 + Support for Full-Day and Multi-Day Events
 + Support for events in different timezones
@@ -37,4 +38,4 @@ as the first argument: `./unifiedagenda.py [path]`.
 + Customizable Indicator Icon
 + Add Mac OS Support with [rumps](https://github.com/jaredks/rumps)
 + Turn this into a fully-fledged package and sumbit to the PyPi?
-+ </del>Basic Functionality:</del>
++ </del>Basic Functionality</del>
